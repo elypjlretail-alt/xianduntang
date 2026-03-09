@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Maxwell79 Recipes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a1a1a">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231a1a1a' width='100' height='100' rx='20'/><text y='65' x='50' text-anchor='middle' font-size='50'>🍵</text></svg>">
+<title>Maxwell79 — Wellness Dessert Recipes</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #111;
+    --card: #1c1c1e;
+    --card-hover: #252528;
+    --text: #f5f5f5;
+    --dim: #8e8e93;
+    --accent: #34C759;
+    --accent-dim: rgba(52,199,89,0.15);
+    --gold: #FFD60A;
+    --gold-dim: rgba(255,214,10,0.15);
+    --red: #FF453A;
+    --red-dim: rgba(255,69,58,0.15);
+    --blue: #64D2FF;
+    --blue-dim: rgba(100,210,255,0.15);
+    --orange: #FF9F0A;
+    --orange-dim: rgba(255,159,10,0.15);
+    --border: #2c2c2e;
+    --radius: 14px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── App Shell ── */
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  .app-header {
+    padding: calc(var(--safe-top) + 12px) 20px 12px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .app-header h1 {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 2px;
+  }
+  .app-header h1 span { color: var(--accent); }
+  .app-header .subtitle {
+    font-size: 12px;
+    color: var(--dim);
+    margin-bottom: 12px;
+  }
+
+  /* ── Search ── */
+  .search-wrap {
+    position: relative;
+    margin-bottom: 12px;
+  }
+  .search-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    fill: var(--dim);
+  }
+  .search {
+    width: 100%;
+    padding: 10px 14px 10px 36px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+  }
+  .search::placeholder { color: var(--dim); }
+  .search:focus { border-color: var(--accent); }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 20px;
+    border: none;
+    background: var(--card);
+    color: var(--dim);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .tab.active {
+    background: var(--accent);
+    color: #000;
+  }
+
+  /* ── Scrollable content ── */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 16px 16px calc(var(--safe-bottom) + 16px);
+  }
+
+  /* ── Stats bar ── */
+  .stats-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .stat-pill {
+    flex: 1;
+    background: var(--card);
+    border-radius: 10px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+  .stat-pill .num {
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .stat-pill .lbl {
+    font-size: 9px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+
+  /* ── Recipe Card ── */
+  .recipe-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+  .recipe-card.expanded { background: var(--card-hover); }
+  .card-head {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    cursor: pointer;
+    gap: 12px;
+    user-select: none;
+  }
+  .card-num {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .card-num.tcm { background: var(--accent-dim); color: var(--accent); }
+  .card-num.sg { background: var(--gold-dim); color: var(--gold); }
+  .card-num.special { background: var(--blue-dim); color: var(--blue); }
+  .card-info { flex: 1; min-width: 0; }
+  .card-info h3 {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 1px;
+  }
+  .card-info .cn {
+    font-size: 12px;
+    color: var(--dim);
+  }
+  .card-badges {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  .badge-price { background: var(--gold-dim); color: var(--gold); }
+  .badge-freeze-yes { background: var(--accent-dim); color: var(--accent); }
+  .badge-freeze-no { background: var(--red-dim); color: var(--red); }
+  .badge-freeze-partial { background: var(--orange-dim); color: var(--orange); }
+  .card-chevron {
+    width: 20px;
+    height: 20px;
+    fill: var(--dim);
+    flex-shrink: 0;
+    transition: transform 0.3s;
+  }
+  .recipe-card.expanded .card-chevron { transform: rotate(90deg); }
+
+  /* ── Card Body (expanded) ── */
+  .card-body {
+    display: none;
+    padding: 0 16px 16px;
+  }
+  .recipe-card.expanded .card-body { display: block; }
+
+  .card-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--dim);
+    margin: 16px 0 8px;
+  }
+  .card-section-label:first-child { margin-top: 0; }
+
+  /* benefit tag */
+  .benefit-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 8px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  /* Ingredient rows */
+  .ing-row {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    gap: 8px;
+  }
+  .ing-row:last-child { border-bottom: none; }
+  .ing-name { flex: 1; }
+  .ing-cn { color: var(--dim); font-size: 11px; }
+  .ing-amt { font-weight: 600; text-align: right; min-width: 50px; }
+  .ing-cost { color: var(--gold); font-weight: 600; text-align: right; min-width: 45px; font-size: 12px; }
+
+  .cost-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background: var(--accent-dim);
+    border-radius: 10px;
+    margin-top: 8px;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--accent);
+  }
+
+  /* Steps */
+  .prep-step {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: #ccc;
+  }
+  .prep-step:last-child { border-bottom: none; }
+  .step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-cn { font-size: 11px; color: var(--dim); margin-top: 2px; }
+
+  /* Tip */
+  .tip-box {
+    background: var(--gold-dim);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: var(--gold);
+    margin-top: 12px;
+    line-height: 1.5;
+  }
+
+  /* Freeze info */
+  .freeze-box {
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 12px;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+  .freeze-box.yes { background: var(--accent-dim); color: var(--accent); }
+  .freeze-box.no { background: var(--red-dim); color: var(--red); }
+  .freeze-box.partial { background: var(--orange-dim); color: var(--orange); }
+
+  /* ── SOP Panel ── */
+  .sop-panel {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .sop-panel h2 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .sop-panel .cn { font-size: 12px; color: var(--dim); margin-bottom: 14px; }
+  .sop-specs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .sop-spec {
+    flex: 1;
+    min-width: 60px;
+    background: #2a2a2e;
+    border-radius: 8px;
+    padding: 8px 6px;
+    text-align: center;
+  }
+  .sop-spec .v { font-size: 16px; font-weight: 800; color: var(--accent); }
+  .sop-spec .l { font-size: 9px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ── Freeze SOP (in SOP tab) ── */
+  .freeze-sop-panel {
+    background: var(--card);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .freeze-sop-panel h2 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  /* ── View toggle (hidden sections) ── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── Bottom Nav ── */
+  .bottom-nav {
+    display: flex;
+    background: #1c1c1e;
+    border-top: 1px solid var(--border);
+    padding: 6px 0 calc(var(--safe-bottom) + 6px);
+  }
+  .nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 0;
+    border: none;
+    background: none;
+    color: var(--dim);
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: color 0.2s;
+  }
+  .nav-btn.active { color: var(--accent); }
+  .nav-btn svg { width: 22px; height: 22px; fill: currentColor; }
+
+  /* ── Print ── */
+  @media print {
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    .app-header, .bottom-nav, .search-wrap, .tabs { display: none !important; }
+    .content { overflow: visible !important; height: auto !important; }
+    .recipe-card { break-inside: avoid; page-break-inside: avoid; }
+    .card-body { display: block !important; }
+    body { background: #fff !important; color: #000 !important; }
+    .recipe-card, .sop-panel, .freeze-sop-panel { background: #f8f8f8 !important; border: 1px solid #ddd !important; }
+    .card-head { cursor: default !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ── Header ── -->
+  <div class="app-header">
+    <h1>Maxwell<span>79</span></h1>
+    <div class="subtitle">Wellness Dessert Recipe Guide — 15 Items</div>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      <input type="text" class="search" placeholder="Search recipes, ingredients..." id="searchInput" oninput="filterRecipes()">
+    </div>
+    <div class="tabs" id="categoryTabs">
+      <button class="tab active" onclick="setCategory('all')">All 15</button>
+      <button class="tab" onclick="setCategory('tcm')">TCM Classics</button>
+      <button class="tab" onclick="setCategory('sg')">SG Signatures</button>
+      <button class="tab" onclick="setCategory('special')">Specials</button>
+      <button class="tab" onclick="setCategory('freezable')">Freezable</button>
+    </div>
+  </div>
+
+  <!-- ── Main Content ── -->
+  <div class="content" id="mainContent">
+
+    <!-- RECIPES VIEW -->
+    <div class="view active" id="view-recipes">
+      <div class="stats-bar">
+        <div class="stat-pill"><div class="num" style="color:var(--accent);">15</div><div class="lbl">Recipes</div></div>
+        <div class="stat-pill"><div class="num" style="color:var(--gold);">$0.67</div><div class="lbl">Avg Cost</div></div>
+        <div class="stat-pill"><div class="num" style="color:var(--accent);">91%</div><div class="lbl">Avg Margin</div></div>
+        <div class="stat-pill"><div class="num" style="color:var(--blue);">8</div><div class="lbl">Freezable</div></div>
+      </div>
+      <div id="recipeList"></div>
+    </div>
+
+    <!-- SOP VIEW -->
+    <div class="view" id="view-sop">
+      <div class="sop-panel">
+        <h2>Universal Steaming SOP</h2>
+        <div class="cn">统一炖煮操作说明 — applies to ALL 15 cups</div>
+        <div class="sop-specs">
+          <div class="sop-spec"><div class="v">220ml</div><div class="l">Jar</div></div>
+          <div class="sop-spec"><div class="v">200ml</div><div class="l">Liquid</div></div>
+          <div class="sop-spec"><div class="v">~70g</div><div class="l">Solids</div></div>
+          <div class="sop-spec"><div class="v">98°C</div><div class="l">Steam</div></div>
+          <div class="sop-spec"><div class="v">35min</div><div class="l">Time</div></div>
+        </div>
+        <div class="prep-step"><div class="step-num">1</div><div>Add solid ingredients first, then top up liquid to 200ml line<div class="step-cn">先放固体原料，再加入液体至 200ml</div></div></div>
+        <div class="prep-step"><div class="step-num">2</div><div>Place lid on loosely — do NOT tighten<div class="step-cn">盖子轻放，不要拧紧</div></div></div>
+        <div class="prep-step"><div class="step-num">3</div><div>Steam at 98°C for 35 minutes<div class="step-cn">蒸箱 98°C，35 分钟</div></div></div>
+        <div class="prep-step"><div class="step-num">4</div><div>Tighten lids immediately after steaming<div class="step-cn">出锅后立即拧紧盖子</div></div></div>
+        <div class="prep-step"><div class="step-num">5</div><div>Chill to ≤4°C within 90 minutes — transfer to blast chiller or ice bath<div class="step-cn">90 分钟内降温至 4°C 以下</div></div></div>
+      </div>
+
+      <div class="freeze-sop-panel">
+        <h2>Freeze & Batch Prep SOP</h2>
+        <div class="cn" style="font-size:12px; color:var(--dim); margin-bottom:14px;">冷冻批量备料操作说明 — for freezable cups only</div>
+        <div class="sop-specs">
+          <div class="sop-spec"><div class="v" style="color:var(--blue);">2 wk</div><div class="l">Max Frozen</div></div>
+          <div class="sop-spec"><div class="v" style="color:var(--orange);">48h</div><div class="l">After Thaw</div></div>
+          <div class="sop-spec"><div class="v" style="color:var(--red);">75°C</div><div class="l">Reheat</div></div>
+        </div>
+        <div class="prep-step"><div class="step-num">1</div><div>Steam & cook as normal. Cool to ≤4°C within 90 min<div class="step-cn">正常蒸煮，90分钟内降温至4°C以下</div></div></div>
+        <div class="prep-step"><div class="step-num">2</div><div>Portion into jars. Cap loosely — leave 1cm headspace<div class="step-cn">留1cm空间给膨胀，盖子轻放</div></div></div>
+        <div class="prep-step"><div class="step-num">3</div><div>Blast freeze or chest freezer within 2 hours. Jars upright<div class="step-cn">2小时内入冷冻，瓶子直立放置</div></div></div>
+        <div class="prep-step"><div class="step-num">4</div><div>Once solid (4–6 hrs), tighten lids. Label: type + date<div class="step-cn">冻实后拧紧盖子，标注品种和日期</div></div></div>
+        <div class="prep-step"><div class="step-num">5</div><div>Thaw overnight in chiller (≤4°C). Steam-reheat to 75°C core before serving<div class="step-cn">前一晚放冷藏解冻，蒸至中心温度75°C</div></div></div>
+        <div class="tip-box" style="margin-top:12px;">
+          <strong>Strategy:</strong> Batch-prep freezable cups on slow days (Mon/Tue). Defrost overnight. Cuts daily active prep from ~2.5h to ~1h on busy days. Never refreeze a thawed cup.
+        </div>
+      </div>
+
+      <div class="sop-panel">
+        <h2>Daily Prep Schedule</h2>
+        <div class="cn" style="font-size:12px; color:var(--dim); margin-bottom:14px;">Target: 40–50 cups/day, 1 person</div>
+        <div class="prep-step"><div class="step-num" style="background:var(--blue); font-size:9px;">PM</div><div><strong>Night before:</strong> Start soaking: white fungus, peach gum, snow swallow, beans, grains (in fridge)</div></div>
+        <div class="prep-step"><div class="step-num" style="font-size:9px;">7a</div><div>Arrive. Drain soaked ingredients. Boil sago. Prep base broth (rock sugar + water)</div></div>
+        <div class="prep-step"><div class="step-num" style="font-size:9px;">730</div><div>Chop fresh items (papaya, ginger, pear). Toast sesame. Portion dry goods into jars</div></div>
+        <div class="prep-step"><div class="step-num" style="font-size:9px;">8a</div><div>Fill jars with liquid. Load steamer batch 1. Start 35-min cycle</div></div>
+        <div class="prep-step"><div class="step-num" style="font-size:9px;">835</div><div>Batch 1 done — tighten lids. Transfer to blast chiller / ice bath</div></div>
+        <div class="prep-step"><div class="step-num" style="font-size:9px;">840</div><div>Load batch 2 if needed. Clean prep area</div></div>
+        <div class="prep-step"><div class="step-num" style="font-size:9px;">915</div><div>Batch 2 done — seal & chill. All cups ≤4°C by 10:00 AM</div></div>
+        <div class="prep-step"><div class="step-num" style="font-size:9px;">10a</div><div>Stock display chiller. Label cups. Ready for service</div></div>
+        <div class="prep-step"><div class="step-num" style="background:var(--gold); font-size:9px;">SVC</div><div><strong>10:30 AM – 8 PM:</strong> Serve from chiller. Track sales. Start tomorrow's soak before closing</div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Bottom Navigation ── -->
+  <div class="bottom-nav">
+    <button class="nav-btn active" onclick="switchView('recipes', this)">
+      <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+      Recipes
+    </button>
+    <button class="nav-btn" onclick="switchView('sop', this)">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM6 20V4h5v7h7v9H6z"/></svg>
+      SOPs
+    </button>
+  </div>
+</div>
+
+<script>
+// ── RECIPE DATA ──
+const recipes = [
+  // TCM CLASSICS (1-5)
+  {
+    id: 1, cat: 'tcm', name: 'White Fungus · Lily · Lotus Seed', cn: '银耳百合莲子羹',
+    benefit: 'Hydration · Skin glow', price: 6.90, cost: 0.68, freeze: 'yes',
+    freezeNote: 'Broth-based — all ingredients hold texture well. Freezes perfectly.',
+    ingredients: [
+      { name: 'White fungus (soaked overnight)', cn: '银耳（泡发）', amt: '8 g', cost: '$0.14' },
+      { name: 'Lily bulb (dried)', cn: '百合', amt: '6 g', cost: '$0.20' },
+      { name: 'Lotus seed', cn: '莲子', amt: '6 g', cost: '$0.13' },
+      { name: 'Red date', cn: '红枣', amt: '2 pcs', cost: '$0.08' },
+      { name: 'Goji berry', cn: '枸杞', amt: '2 g', cost: '$0.05' },
+      { name: 'Base broth', cn: '基础汤底', amt: '200 ml', cost: '$0.08' }
+    ],
+    steps: [
+      { text: 'Soak white fungus 4–8 hours until fully expanded. Trim yellow core, tear into small florets.', cn: '银耳提前泡发4-8小时，去蒂撕小朵' },
+      { text: 'Rinse lotus seeds. Remove green core (bitter) if not pre-cored.', cn: '莲子洗净，去芯（苦）' },
+      { text: 'Layer: white fungus → lotus seed → lily bulb → red date → goji on top.', cn: '' },
+      { text: 'Pour base broth to 200ml line. Follow universal steaming SOP.', cn: '' }
+    ],
+    tip: 'White fungus should be gelatinous after steaming — if still crunchy, soak time was too short. Pre-soak in fridge overnight for morning batch.'
+  },
+  {
+    id: 2, cat: 'tcm', name: 'Papaya · Snow Swallow · Peach Gum', cn: '木瓜雪燕桃胶',
+    benefit: 'Collagen · Beauty', price: 8.90, cost: 0.66, freeze: 'partial',
+    freezeNote: 'Freeze base + gum only. Add fresh papaya cubes on serving day — papaya turns mushy when frozen.',
+    ingredients: [
+      { name: 'Papaya (fresh, cubed)', cn: '木瓜', amt: '35 g', cost: '$0.08' },
+      { name: 'Peach gum (soaked 12hrs)', cn: '桃胶（泡发）', amt: '10 g', cost: '$0.15' },
+      { name: 'Snow swallow (soaked 12hrs)', cn: '雪燕（泡发）', amt: '4 g', cost: '$0.30' },
+      { name: 'Goji berry', cn: '枸杞', amt: '2 g', cost: '$0.05' },
+      { name: 'Base broth', cn: '基础汤底', amt: '200 ml', cost: '$0.08' }
+    ],
+    steps: [
+      { text: 'Soak peach gum and snow swallow separately for 12+ hours. Remove impurities from peach gum.', cn: '桃胶和雪燕分别泡发12小时以上，去杂质' },
+      { text: 'Cut papaya into 1cm cubes. Use ripe but firm papaya.', cn: '' },
+      { text: 'Layer: peach gum → snow swallow → papaya cubes → goji on top.', cn: '' },
+      { text: 'Pour base broth to 200ml line. Follow universal steaming SOP.', cn: '' }
+    ],
+    tip: 'Hero cup at $8.90. Snow swallow and peach gum are the "Instagram ingredients" — make sure they\'re visible through the jar. Place papaya cubes against the glass.'
+  },
+  {
+    id: 3, cat: 'tcm', name: 'Black Sesame · Walnut', cn: '黑芝麻核桃露',
+    benefit: 'Brain health · Hair & skin', price: 6.90, cost: 0.51, freeze: 'yes',
+    freezeNote: 'Paste-based — actually gets creamier on thaw. Freezes beautifully.',
+    ingredients: [
+      { name: 'Black sesame', cn: '黑芝麻', amt: '8 g', cost: '$0.08' },
+      { name: 'Walnut', cn: '核桃', amt: '10 g', cost: '$0.25' },
+      { name: 'Almond', cn: '杏仁', amt: '6 g', cost: '$0.10' },
+      { name: 'Base broth', cn: '基础汤底', amt: '200 ml', cost: '$0.08' }
+    ],
+    steps: [
+      { text: 'Lightly toast black sesame in dry pan until fragrant (2 min, medium heat). Do not burn.', cn: '黑芝麻小火干炒至出香，不要焦' },
+      { text: 'Rough-chop walnuts. Blitz sesame + walnut + almond briefly — leave some texture.', cn: '' },
+      { text: 'Add blended mix to jar, pour base broth to 200ml line.', cn: '' },
+      { text: 'Follow universal steaming SOP. Stir gently after opening if contents have settled.', cn: '' }
+    ],
+    tip: 'Cheapest cup to make ($0.51). High margin star. Dark colour looks rich and premium in the jar.'
+  },
+  {
+    id: 4, cat: 'tcm', name: 'Red Bean · Job\'s Tears · Foxnut', cn: '红豆薏米芡实饮',
+    benefit: 'Detox · Bloating relief', price: 6.90, cost: 0.63, freeze: 'yes',
+    freezeNote: 'Bean/grain textures hold up perfectly in sugar syrup. Ideal for batch-freezing.',
+    ingredients: [
+      { name: 'Red bean', cn: '红豆', amt: '25 g', cost: '$0.12' },
+      { name: 'Job\'s tears (barley)', cn: '薏米', amt: '15 g', cost: '$0.12' },
+      { name: 'Foxnut (Qian Shi)', cn: '芡实', amt: '8 g', cost: '$0.28' },
+      { name: 'Dried tangerine peel', cn: '陈皮', amt: '1 g', cost: '$0.03' },
+      { name: 'Base broth', cn: '基础汤底', amt: '200 ml', cost: '$0.08' }
+    ],
+    steps: [
+      { text: 'Pre-soak red bean and job\'s tears for 4–6 hours (or overnight). Essential — 35min steam won\'t soften un-soaked beans.', cn: '红豆薏米提前浸泡4-6小时' },
+      { text: 'Rinse foxnut. Soak dried tangerine peel 30 min, scrape off white pith.', cn: '' },
+      { text: 'Layer: red bean → job\'s tears → foxnut → tangerine peel on top.', cn: '' },
+      { text: 'Pour base broth to 200ml. Follow universal steaming SOP.', cn: '' }
+    ],
+    tip: 'Most TCM-recognisable cup — 红豆薏米 is a household name. Highest seller among Chinese customers. Don\'t skip the tangerine peel — it cuts the heaviness.'
+  },
+  {
+    id: 5, cat: 'tcm', name: 'Longan · Red Date Stewed Milk', cn: '桂圆红枣炖奶',
+    benefit: 'Energy · Warming', price: 7.90, cost: 0.74, freeze: 'no',
+    freezeNote: 'Fresh milk curdles and separates on freeze-thaw. Must be made fresh daily.',
+    ingredients: [
+      { name: 'Dried longan', cn: '桂圆', amt: '2 pcs', cost: '$0.06' },
+      { name: 'Red date', cn: '红枣', amt: '2 pcs', cost: '$0.08' },
+      { name: 'Goji berry', cn: '枸杞', amt: '2 g', cost: '$0.05' },
+      { name: 'Fresh milk (full cream)', cn: '鲜牛奶', amt: '200 ml', cost: '$0.55' }
+    ],
+    steps: [
+      { text: 'Slice red dates in half, remove pit. Releases more flavour into the milk.', cn: '红枣切半去核' },
+      { text: 'Place longan, red date halves, and goji into jar.', cn: '' },
+      { text: 'Pour fresh milk to 200ml line. Do NOT use UHT — fresh milk gives cleaner, sweeter taste.', cn: '' },
+      { text: 'Follow universal steaming SOP. Milk will develop a thin skin on top — normal and desirable.', cn: '' }
+    ],
+    tip: 'Most approachable for non-Chinese customers. Stewed milk has a custard-like sweetness. Key crossover seller.'
+  },
+  // SG SIGNATURES (6-8)
+  {
+    id: 6, cat: 'sg', name: 'Pandan Coconut Sago', cn: '香兰椰奶西米饮',
+    benefit: 'Comfort · Sustained energy', price: 7.90, cost: 0.69, freeze: 'no',
+    freezeNote: 'Sago pearls collapse into paste on freeze-thaw. Coconut milk splits. Must be same-day.',
+    ingredients: [
+      { name: 'Pandan leaf (knotted)', cn: '香兰叶', amt: '½ leaf', cost: '$0.05' },
+      { name: 'Sago pearls (pre-cooked)', cn: '西米', amt: '20 g', cost: '$0.08' },
+      { name: 'Coconut milk', cn: '椰奶', amt: '150 ml', cost: '$0.55' },
+      { name: 'Water / base broth', cn: '水', amt: '50 ml', cost: '$0.01' }
+    ],
+    steps: [
+      { text: 'Pre-cook sago in bulk: boil until translucent with small white centre, drain, rinse in cold water. Store in fridge.', cn: '西米提前煮至透明，过冷水沥干备用' },
+      { text: 'Knot pandan leaf and place in jar with cooked sago.', cn: '' },
+      { text: 'Mix coconut milk + water, pour to 200ml line.', cn: '' },
+      { text: 'Follow universal steaming SOP. The pandan infuses during steaming.', cn: '' }
+    ],
+    tip: 'Gateway cup for locals — everyone knows pandan + coconut + sago. Cook sago in large batches, keeps 2 days in fridge.'
+  },
+  {
+    id: 7, cat: 'sg', name: 'Red Date Longan Ginger Milk', cn: '姜枣桂圆炖奶',
+    benefit: 'Circulation · Warming recovery', price: 7.90, cost: 0.72, freeze: 'no',
+    freezeNote: 'Same as #5 — fresh milk doesn\'t survive freeze-thaw. Make fresh daily.',
+    ingredients: [
+      { name: 'Fresh ginger (sliced thin)', cn: '生姜', amt: '4 g', cost: '$0.03' },
+      { name: 'Red date', cn: '红枣', amt: '2 pcs', cost: '$0.08' },
+      { name: 'Dried longan', cn: '桂圆', amt: '2 pcs', cost: '$0.06' },
+      { name: 'Fresh milk (full cream)', cn: '鲜牛奶', amt: '200 ml', cost: '$0.55' }
+    ],
+    steps: [
+      { text: 'Slice ginger into thin coins (2mm). Young ginger = milder, old ginger = stronger.', cn: '姜切薄片，嫩姜温和，老姜辛辣' },
+      { text: 'Halve and pit red dates. Place ginger, dates, longan into jar.', cn: '' },
+      { text: 'Pour fresh milk to 200ml line.', cn: '' },
+      { text: 'Follow universal steaming SOP. Ginger intensifies during steaming — don\'t exceed 4g unless very punchy flavour wanted.', cn: '' }
+    ],
+    tip: 'Twist on classic 姜撞奶. Incredibly comforting. Sells especially well on rainy days and with women post-lunch in CBD.'
+  },
+  {
+    id: 8, cat: 'sg', name: 'Chendol Black Sesame', cn: '香兰黑芝麻炖饮',
+    benefit: 'Brain · Skin · Anti-fatigue', price: 7.90, cost: 0.76, freeze: 'yes',
+    freezeNote: 'Coconut milk + sesame paste blend holds well when frozen. Stir after thaw-reheat.',
+    ingredients: [
+      { name: 'Black sesame paste', cn: '黑芝麻酱', amt: '12 g', cost: '$0.15' },
+      { name: 'Pandan leaf (knotted)', cn: '香兰叶', amt: '½ leaf', cost: '$0.05' },
+      { name: 'Coconut milk', cn: '椰奶', amt: '150 ml', cost: '$0.55' },
+      { name: 'Water / base broth', cn: '水', amt: '50 ml', cost: '$0.01' }
+    ],
+    steps: [
+      { text: 'Dissolve black sesame paste in a small amount of warm water first to avoid clumping.', cn: '黑芝麻酱先用少量温水化开，避免结块' },
+      { text: 'Knot pandan leaf, place in jar with dissolved sesame paste.', cn: '' },
+      { text: 'Mix coconut milk + water, pour to 200ml line. Stir gently.', cn: '' },
+      { text: 'Follow universal steaming SOP. Pandan + coconut creates the chendol profile.', cn: '' }
+    ],
+    tip: 'Most unique cup — nobody does chendol × black sesame fusion. Dark, creamy, aromatic. Great conversation starter and Instagram content.'
+  },
+  // ROTATING SPECIALS (9-15)
+  {
+    id: 9, cat: 'special', name: 'Snow Pear · White Fungus · Goji', cn: '雪梨银耳枸杞汤',
+    benefit: 'Respiratory · Throat soothing', price: 6.90, cost: 0.62, freeze: 'partial',
+    freezeNote: 'Freeze the base + fungus only. Add fresh pear cubes on serving day — pear goes soft when frozen.',
+    ingredients: [
+      { name: 'Snow pear (cubed)', cn: '雪梨', amt: '40 g', cost: '$0.12' },
+      { name: 'White fungus (soaked)', cn: '银耳（泡发）', amt: '6 g', cost: '$0.10' },
+      { name: 'Goji berry', cn: '枸杞', amt: '2 g', cost: '$0.05' },
+      { name: 'Rock sugar', cn: '冰糖', amt: '5 g', cost: '$0.03' },
+      { name: 'Dried tangerine peel', cn: '陈皮', amt: '1 g', cost: '$0.03' },
+      { name: 'Filtered water', cn: '过滤水', amt: '200 ml', cost: '$0.01' }
+    ],
+    steps: [
+      { text: 'Soak white fungus 4–6 hours, tear into small florets.', cn: '银耳泡发4-6小时，撕小朵' },
+      { text: 'Core and cube snow pear (skin on for nutrients, off for smooth texture).', cn: '雪梨去核切块' },
+      { text: 'Layer: fungus → pear → tangerine peel → goji. Dissolve rock sugar in water, pour to 200ml.', cn: '' },
+      { text: 'Follow universal steaming SOP.', cn: '' }
+    ],
+    tip: 'Classic TCM cough/throat remedy. Sells strongest during haze season and aircon-dry office months. Familiar to every Chinese household.'
+  },
+  {
+    id: 10, cat: 'special', name: 'Mung Bean · Lily · Lotus Seed', cn: '绿豆百合莲子汤',
+    benefit: 'Cooling · Heat-clearing', price: 6.90, cost: 0.55, freeze: 'yes',
+    freezeNote: 'Bean/seed textures hold up well in syrup. Great for batch-freezing.',
+    ingredients: [
+      { name: 'Mung bean (split)', cn: '绿豆', amt: '25 g', cost: '$0.08' },
+      { name: 'Lily bulb (dried)', cn: '百合', amt: '5 g', cost: '$0.17' },
+      { name: 'Lotus seed', cn: '莲子', amt: '5 g', cost: '$0.11' },
+      { name: 'Pandan leaf', cn: '香兰叶', amt: '½ leaf', cost: '$0.05' },
+      { name: 'Rock sugar + water', cn: '冰糖 + 水', amt: '200 ml', cost: '$0.06' }
+    ],
+    steps: [
+      { text: 'Soak mung beans 2–4 hours. Split mung beans cook faster — whole beans need overnight soak.', cn: '绿豆浸泡2-4小时' },
+      { text: 'Rinse lotus seeds, remove bitter core if needed.', cn: '莲子去芯' },
+      { text: 'Layer: mung bean → lotus seed → lily bulb. Add knotted pandan leaf. Pour sweetened water to 200ml.', cn: '' },
+      { text: 'Follow universal steaming SOP.', cn: '' }
+    ],
+    tip: 'The quintessential "cooling" dessert in SG/MY. Huge seller in hot weather. Adding pandan gives it a local twist that differentiates from traditional versions.'
+  },
+  {
+    id: 11, cat: 'special', name: 'Sweet Potato · Ginger Soup', cn: '番薯姜汤',
+    benefit: 'Warming · Digestive', price: 6.90, cost: 0.48, freeze: 'yes',
+    freezeNote: 'Root veg holds texture perfectly. Ginger flavour intensifies — even better from frozen.',
+    ingredients: [
+      { name: 'Sweet potato (cubed, mixed colours)', cn: '番薯（混色）', amt: '50 g', cost: '$0.10' },
+      { name: 'Fresh ginger (sliced)', cn: '生姜', amt: '5 g', cost: '$0.04' },
+      { name: 'Pandan leaf', cn: '香兰叶', amt: '½ leaf', cost: '$0.05' },
+      { name: 'Brown sugar + water', cn: '红糖 + 水', amt: '200 ml', cost: '$0.05' }
+    ],
+    steps: [
+      { text: 'Peel and cube sweet potato into 1.5cm pieces. Use a mix of orange and purple for visual appeal.', cn: '番薯去皮切1.5cm块，橙色紫色混搭' },
+      { text: 'Slice ginger into thin coins (3-4 pieces).', cn: '姜切薄片' },
+      { text: 'Layer: sweet potato → ginger → pandan leaf. Dissolve brown sugar in water, pour to 200ml.', cn: '' },
+      { text: 'Follow universal steaming SOP. Sweet potato should be fork-tender but not mushy.', cn: '' }
+    ],
+    tip: 'Cheapest cup at $0.48. Extremely nostalgic for locals — every Ah Ma makes this. Brown sugar gives it a warmer, deeper flavour than rock sugar. Comfort food in a jar.'
+  },
+  {
+    id: 12, cat: 'special', name: 'Black Soy Bean · Longan · Red Date', cn: '黑豆桂圆红枣汤',
+    benefit: 'Blood nourishing · Kidney support', price: 6.90, cost: 0.52, freeze: 'yes',
+    freezeNote: 'Legume + dried fruit = freezer-safe. Holds up perfectly for 2 weeks.',
+    ingredients: [
+      { name: 'Black soy bean', cn: '黑豆', amt: '25 g', cost: '$0.10' },
+      { name: 'Dried longan', cn: '桂圆', amt: '3 pcs', cost: '$0.09' },
+      { name: 'Red date', cn: '红枣', amt: '2 pcs', cost: '$0.08' },
+      { name: 'Goji berry', cn: '枸杞', amt: '2 g', cost: '$0.05' },
+      { name: 'Rock sugar + water', cn: '冰糖 + 水', amt: '200 ml', cost: '$0.06' }
+    ],
+    steps: [
+      { text: 'Dry-toast black soy beans in pan for 3–4 min until fragrant and skins start to crack. This deepens flavour.', cn: '黑豆干炒3-4分钟至出香裂皮' },
+      { text: 'Soak toasted beans 4–6 hours (or overnight).', cn: '浸泡4-6小时' },
+      { text: 'Halve and pit red dates. Layer: black bean → longan → red date → goji on top.', cn: '' },
+      { text: 'Pour sweetened water to 200ml. Follow universal steaming SOP.', cn: '' }
+    ],
+    tip: 'Strong TCM credentials — black bean is the #1 kidney-nourishing food in Chinese medicine. Toasting before soaking is the secret to depth of flavour. Very popular with older Chinese customers.'
+  },
+  {
+    id: 13, cat: 'special', name: 'Almond · Fig · Lily Bulb', cn: '杏仁无花果百合汤',
+    benefit: 'Respiratory · Throat care', price: 7.90, cost: 0.72, freeze: 'yes',
+    freezeNote: 'All dried ingredients — freezes perfectly. No texture loss.',
+    ingredients: [
+      { name: 'South almond (sweet)', cn: '南杏', amt: '8 g', cost: '$0.15' },
+      { name: 'North almond (bitter)', cn: '北杏', amt: '3 g', cost: '$0.08' },
+      { name: 'Dried fig', cn: '无花果干', amt: '2 pcs', cost: '$0.20' },
+      { name: 'Lily bulb (dried)', cn: '百合', amt: '5 g', cost: '$0.17' },
+      { name: 'Rock sugar + water', cn: '冰糖 + 水', amt: '200 ml', cost: '$0.06' }
+    ],
+    steps: [
+      { text: 'Rinse both almond types. South almond is mild/sweet, north almond adds a slight bitter depth — don\'t use more than 3g north.', cn: '南杏甜，北杏苦，北杏不超过3g' },
+      { text: 'Halve dried figs. Rinse lily bulb.', cn: '' },
+      { text: 'Layer: almonds → lily bulb → fig halves on top.', cn: '' },
+      { text: 'Pour sweetened water to 200ml. Follow universal steaming SOP.', cn: '' }
+    ],
+    tip: 'Classic Cantonese "lung soup" dessert. South+North almond combo is iconic. Figs add natural sweetness and visual appeal. Great haze/cold season seller.'
+  },
+  {
+    id: 14, cat: 'special', name: 'Purple Rice · Coconut Milk', cn: '紫米椰奶',
+    benefit: 'Antioxidant · Sustained energy', price: 7.90, cost: 0.58, freeze: 'no',
+    freezeNote: 'Rice texture changes on freeze-thaw (becomes grainy). Best served fresh or same-day.',
+    ingredients: [
+      { name: 'Purple/black glutinous rice', cn: '紫米 / 黑糯米', amt: '25 g', cost: '$0.10' },
+      { name: 'Coconut milk', cn: '椰奶', amt: '120 ml', cost: '$0.44' },
+      { name: 'Pandan leaf', cn: '香兰叶', amt: '½ leaf', cost: '$0.05' },
+      { name: 'Water', cn: '水', amt: '80 ml', cost: '$0.01' }
+    ],
+    steps: [
+      { text: 'Soak purple rice overnight (minimum 6 hours). It will turn the water deep purple — this is normal.', cn: '紫米提前浸泡6小时以上' },
+      { text: 'Drain rice. Place in jar with knotted pandan leaf.', cn: '' },
+      { text: 'Mix coconut milk + water, pour to 200ml line.', cn: '' },
+      { text: 'Follow universal steaming SOP. Rice should be tender but still have some bite (not mushy).', cn: '' }
+    ],
+    tip: 'Thai/MY-inspired — pulut hitam in a jar. The purple-white colour contrast is stunning through glass. Natural antioxidant angle for health-conscious buyers. Very Instagrammable.'
+  },
+  {
+    id: 15, cat: 'special', name: 'Osmanthus · Peach Gum · Wolfberry', cn: '桂花桃胶枸杞饮',
+    benefit: 'Beauty · Skin elasticity', price: 8.90, cost: 0.78, freeze: 'yes',
+    freezeNote: 'Peach gum and broth freeze well. Osmanthus flavour preserved. Add extra dried osmanthus on top when serving from frozen for aroma.',
+    ingredients: [
+      { name: 'Peach gum (soaked 12hrs)', cn: '桃胶（泡发）', amt: '12 g', cost: '$0.18' },
+      { name: 'Dried osmanthus flowers', cn: '桂花', amt: '2 g', cost: '$0.15' },
+      { name: 'Goji berry', cn: '枸杞', amt: '3 g', cost: '$0.08' },
+      { name: 'Snow fungus (soaked)', cn: '银耳（泡发）', amt: '5 g', cost: '$0.09' },
+      { name: 'Rock sugar + water', cn: '冰糖 + 水', amt: '200 ml', cost: '$0.08' }
+    ],
+    steps: [
+      { text: 'Soak peach gum 12+ hours. Pick out impurities. It will expand 8-10x.', cn: '桃胶泡发12小时以上，挑去杂质' },
+      { text: 'Soak snow fungus 4 hours, tear into small pieces.', cn: '银耳泡发4小时，撕小朵' },
+      { text: 'Layer: snow fungus → peach gum → goji. Sprinkle half the osmanthus inside.', cn: '' },
+      { text: 'Pour sweetened water to 200ml. Steam per SOP. Garnish with remaining dried osmanthus on top after steaming.', cn: '' }
+    ],
+    tip: 'Premium tier at $8.90. Osmanthus gives a floral, honey-like aroma that hits when the jar opens — sensory selling at its best. Save some dried flowers as garnish on top for visual impact.'
+  }
+];
+
+// ── RENDER ──
+let currentCategory = 'all';
+let currentView = 'recipes';
+
+function renderRecipes() {
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  const list = document.getElementById('recipeList');
+  const filtered = recipes.filter(r => {
+    const catMatch = currentCategory === 'all' ||
+      currentCategory === r.cat ||
+      (currentCategory === 'freezable' && (r.freeze === 'yes' || r.freeze === 'partial'));
+    const searchMatch = !query ||
+      r.name.toLowerCase().includes(query) ||
+      r.cn.includes(query) ||
+      r.benefit.toLowerCase().includes(query) ||
+      r.ingredients.some(i => i.name.toLowerCase().includes(query) || i.cn.includes(query));
+    return catMatch && searchMatch;
+  });
+
+  list.innerHTML = filtered.map(r => `
+    <div class="recipe-card" id="card-${r.id}" onclick="toggleCard(${r.id})">
+      <div class="card-head">
+        <div class="card-num ${r.cat}">${r.id}</div>
+        <div class="card-info">
+          <h3>${r.name}</h3>
+          <div class="cn">${r.cn}</div>
+        </div>
+        <div class="card-badges">
+          <span class="badge badge-price">$${r.price.toFixed(2)}</span>
+          <span class="badge badge-freeze-${r.freeze}">${r.freeze === 'yes' ? 'Freeze' : r.freeze === 'partial' ? 'Partial' : 'Fresh'}</span>
+        </div>
+        <svg class="card-chevron" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+      </div>
+      <div class="card-body">
+        <span class="benefit-tag">${r.benefit}</span>
+
+        <div class="card-section-label">Ingredients (per 220ml jar)</div>
+        ${r.ingredients.map(i => `
+          <div class="ing-row">
+            <div class="ing-name">${i.name}<div class="ing-cn">${i.cn}</div></div>
+            <div class="ing-amt">${i.amt}</div>
+            <div class="ing-cost">${i.cost}</div>
+          </div>
+        `).join('')}
+        <div class="cost-total">
+          <span>Ingredient cost</span>
+          <span>$${r.cost.toFixed(2)}</span>
+        </div>
+        <div class="cost-total" style="background:var(--gold-dim); color:var(--gold); margin-top:6px;">
+          <span>Margin</span>
+          <span>${Math.round((1 - r.cost / r.price) * 100)}%</span>
+        </div>
+
+        <div class="card-section-label">Prep Steps</div>
+        ${r.steps.map((s, i) => `
+          <div class="prep-step">
+            <div class="step-num">${i + 1}</div>
+            <div>${s.text}${s.cn ? `<div class="step-cn">${s.cn}</div>` : ''}</div>
+          </div>
+        `).join('')}
+
+        <div class="freeze-box ${r.freeze}">
+          <strong>${r.freeze === 'yes' ? 'Freezable' : r.freeze === 'partial' ? 'Partially Freezable' : 'Fresh Only'}:</strong> ${r.freezeNote}
+        </div>
+
+        ${r.tip ? `<div class="tip-box"><strong>Tip:</strong> ${r.tip}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleCard(id) {
+  const card = document.getElementById('card-' + id);
+  card.classList.toggle('expanded');
+}
+
+function setCategory(cat) {
+  currentCategory = cat;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  renderRecipes();
+}
+
+function filterRecipes() {
+  renderRecipes();
+}
+
+function switchView(view, btn) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentView = view;
+}
+
+// Initial render
+renderRecipes();
+</script>
+</body>
+</html>
